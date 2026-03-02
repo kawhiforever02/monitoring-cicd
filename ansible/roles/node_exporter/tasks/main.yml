@@ -20,7 +20,7 @@
 
 - name:  复制二进制文件
   copy:
-    src: "/tmp/{{ ne_extract.stdout_lines | select('match', 'node_exporter-.*') | first }}/node_exporter"
+    src: "/tmp/node_exporter-1.10.2.linux-amd64/node_exporter"
     dest: /usr/local/bin/node_exporter
     owner: node_exporter
     group: node_exporter

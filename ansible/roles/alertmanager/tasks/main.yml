@@ -19,7 +19,7 @@
 
 - name:  复制二进制
   copy:
-    src: "/tmp/{{ am_extract.stdout_lines | select('match', 'alertmanager-.*') | first }}/alertmanager"
+    src: "/tmp/alertmanager-0.31.1.linux-amd64/alertmanager"
     dest: /usr/local/bin/alertmanager
     owner: alertmanager
     group: alertmanager
