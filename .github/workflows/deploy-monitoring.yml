@@ -61,7 +61,7 @@ jobs:
           ANSIBLE_NOCOLOR: "1"
 
       - name:  部署验证
-        run: bash ../scripts/verify-deployment.sh
+        run: bash ./scripts/verify-deployment.sh
         env:
           ROCKY_IP: ${{ secrets.ROCKY_IP }}
 
