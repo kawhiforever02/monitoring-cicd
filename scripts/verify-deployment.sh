@@ -4,7 +4,7 @@ date >> deployment-report.txt
 
 # 检查Rocky Node Exporter
 echo -n "Rocky Node Exporter: " >> deployment-report.txt
-if curl -s http://$ROCKY_IP:9100/metrics | head -1 | grep -q "node_exporter"; then
+if curl -m 10 -s http://$ROCKY_IP:9100/metrics 2>/dev/null | grep -q "node_cpu_seconds_total"; then
   echo " UP" >> deployment-report.txt
 else
   echo " DOWN" >> deployment-report.txt
