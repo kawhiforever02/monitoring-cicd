@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'ubuntu-local'
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          instance: 'Ubuntu监控中心'
+          os: 'Ubuntu'
+
+  - job_name: 'rocky-node'
+    static_configs:
+      - targets: ['{{ hostvars["rocky"].ansible_host }}:9100']
+        labels:
+          instance: 'Rocky应用服务器'
+          os: 'Rocky'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']

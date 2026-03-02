@@ -1,0 +1,75 @@
+---
+- name:  创建prometheus用户
+  user:
+    name: prometheus
+    shell: /bin/false
+    create_home: no
+
+- name:  下载Prometheus
+  get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v3.10.0/prometheus-3.10.0.linux-amd64.tar.gz"
+    dest: /tmp/prometheus.tar.gz
+
+- name:  解压
+  unarchive:
+    src: /tmp/prometheus.tar.gz
+    dest: /tmp
+    remote_src: yes
+  register: p_extract
+
+- name:  复制二进制
+  copy:
+    src: "/tmp/{{ p_extract.stdout_lines | select('match', 'prometheus-.*') | first }}/prometheus"
+    dest: /usr/local/bin/prometheus
+    owner: prometheus
+    group: prometheus
+    mode: '0755'
+
+- name:  创建目录
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: '0755'
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+- name:  生成prometheus.yml（动态targets！）
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0644'
+
+- name:  生成systemd服务
+  copy:
+    dest: /etc/systemd/system/prometheus.service
+    content: |
+      [Unit]
+      Description=Prometheus
+      After=network.target
+
+      [Service]
+      User=prometheus
+      Group=prometheus
+      ExecStart=/usr/local/bin/prometheus \
+        --config.file=/etc/prometheus/prometheus.yml \
+        --storage.tsdb.path=/var/lib/prometheus \
+        --web.listen-address=0.0.0.0:9090
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name:  启动服务
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: started
+    daemon_reload: yes

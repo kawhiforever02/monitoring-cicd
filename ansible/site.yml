@@ -1,0 +1,15 @@
+---
+- name:  部署监控中心（Ubuntu）
+  hosts: monitoring_center
+  become: yes
+  roles:
+    - node_exporter      # 监控Ubuntu自身
+    - prometheus
+    - alertmanager
+    - grafana
+
+- name:  部署被监控节点（Rocky）
+  hosts: rocky_nodes
+  become: yes
+  roles:
+    - node_exporter      # 仅部署Agent

@@ -1,0 +1,66 @@
+name:  监控体系自动化部署
+
+on:
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # 使用Ubuntu Runner
+    steps:
+      - name:  检出代码
+        uses: actions/checkout@v4
+
+      - name:  配置SSH密钥（连接Rocky）
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{ secrets.ROCKY_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+          # 验证连接
+          ssh -o StrictHostKeyChecking=no ${{ secrets.ROCKY_USER }}@${{ secrets.ROCKY_IP }} "echo ' SSH连接成功'"
+
+      - name:  生成动态Inventory（自动注入IP）
+        run: |
+          mkdir -p ansible/inventory
+          cat > ansible/inventory/hosts <<EOF
+          [monitoring_center]
+          ubuntu ansible_connection=local
+
+          [rocky_nodes]
+          rocky ansible_host=${{ secrets.ROCKY_IP }} ansible_user=${{ secrets.ROCKY_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+          [all_nodes:children]
+          monitoring_center
+          rocky_nodes
+          EOF
+          echo " Inventory内容（敏感信息已屏蔽）："
+          cat ansible/inventory/hosts
+
+      - name:  安装Ansible（若Runner未预装）
+        run: |
+          if ! command -v ansible-playbook &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ansible
+          fi
+
+      - name:  执行Ansible部署（注入敏感变量）
+        run: |
+          cd ansible
+          ansible-playbook site.yml -i inventory/hosts \
+            --extra-vars "alert_email=${{ secrets.ALERT_EMAIL }}" \
+            --extra-vars "smtp_password=${{ secrets.SMTP_PASSWORD }}"
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_NOCOLOR: "1"
+
+      - name:  部署验证
+        run: bash ../scripts/verify-deployment.sh
+        env:
+          ROCKY_IP: ${{ secrets.ROCKY_IP }}
+
+      - name:  上传部署报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report
+          path: deployment-report.txt

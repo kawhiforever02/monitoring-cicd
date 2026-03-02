@@ -1,0 +1,30 @@
+---
+- name:  添加Grafana GPG密钥
+  apt_key:
+    url: https://apt.grafana.com/gpg.key
+    state: present
+
+- name:  添加Grafana仓库
+  apt_repository:
+    repo: "deb https://apt.grafana.com stable main"
+    state: present
+    filename: grafana
+
+- name:  安装Grafana
+  apt:
+    name: grafana
+    state: present
+    update_cache: yes
+
+- name:  启动服务
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: started
+
+- name:  等待Grafana就绪
+  wait_for:
+    host: localhost
+    port: 3000
+    delay: 5
+    timeout: 60

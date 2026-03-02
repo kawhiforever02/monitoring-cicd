@@ -1,0 +1,72 @@
+---
+- name:  创建alertmanager用户
+  user:
+    name: alertmanager
+    shell: /bin/false
+    create_home: no
+
+- name:  下载Alertmanager
+  get_url:
+    url: "https://github.com/prometheus/alertmanager/releases/download/v0.31.1/alertmanager-0.31.1.linux-amd64.tar.gz"
+    dest: /tmp/alertmanager.tar.gz
+
+- name:  解压
+  unarchive:
+    src: /tmp/alertmanager.tar.gz
+    dest: /tmp
+    remote_src: yes
+  register: am_extract
+
+- name:  复制二进制
+  copy:
+    src: "/tmp/{{ am_extract.stdout_lines | select('match', 'alertmanager-.*') | first }}/alertmanager"
+    dest: /usr/local/bin/alertmanager
+    owner: alertmanager
+    group: alertmanager
+    mode: '0755'
+
+- name:  创建目录
+  file:
+    path: /etc/alertmanager
+    state: directory
+    owner: alertmanager
+    group: alertmanager
+    mode: '0755'
+
+- name:  生成alertmanager.yml（敏感信息注入！）
+  template:
+    src: alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
+    owner: alertmanager
+    group: alertmanager
+    mode: '0600'
+  no_log: true  # 防止密码泄露到日志
+
+- name:  生成systemd服务
+  copy:
+    dest: /etc/systemd/system/alertmanager.service
+    content: |
+      [Unit]
+      Description=Alertmanager
+      After=network.target
+
+      [Service]
+      User=alertmanager
+      Group=alertmanager
+      ExecStart=/usr/local/bin/alertmanager \
+        --config.file=/etc/alertmanager/alertmanager.yml \
+        --storage.path=/var/lib/alertmanager
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name:  启动服务
+  systemd:
+    name: alertmanager
+    enabled: yes
+    state: started
+    daemon_reload: yes

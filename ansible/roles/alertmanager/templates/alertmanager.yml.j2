@@ -1,0 +1,19 @@
+global:
+  smtp_smarthost: 'smtp.qq.com:465'
+  smtp_from: '{{ alert_email }}'
+  smtp_auth_username: '{{ alert_email }}'
+  smtp_auth_password: '{{ smtp_password }}'
+  smtp_require_tls: false
+
+route:
+  receiver: 'email-notifications'
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+
+receivers:
+- name: 'email-notifications'
+  email_configs:
+  - to: '{{ alert_email }}'
+    send_resolved: true

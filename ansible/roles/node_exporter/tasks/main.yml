@@ -1,0 +1,66 @@
+---
+- name:  创建node_exporter用户
+  user:
+    name: node_exporter
+    shell: /bin/false
+    create_home: no
+
+- name:  下载Node Exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v1.10.2/node_exporter-1.10.2.linux-amd64.tar.gz"
+    dest: /tmp/node_exporter.tar.gz
+    checksum: "sha256:de69ec8341c8068b7c8e4cfe3eb85065d24d984a3b33007f575d307d13eb89a6"  # 可选
+
+- name:  解压并安装
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+  register: ne_extract
+
+- name:  复制二进制文件
+  copy:
+    src: "/tmp/{{ ne_extract.stdout_lines | select('match', 'node_exporter-.*') | first }}/node_exporter"
+    dest: /usr/local/bin/node_exporter
+    owner: node_exporter
+    group: node_exporter
+    mode: '0755'
+
+- name:  创建systemd服务
+  copy:
+    dest: /etc/systemd/system/node_exporter.service
+    content: |
+      [Unit]
+      Description=Node Exporter
+      After=network.target
+
+      [Service]
+      User=node_exporter
+      ExecStart=/usr/local/bin/node_exporter --collector.systemd --collector.processes
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: '0644'
+
+- name:  启动服务
+  systemd:
+    name: node_exporter
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+# 仅对Rocky配置防火墙（允许Ubuntu IP访问9100）
+- name:  配置Rocky防火墙（仅当是Rocky节点时）
+  firewalld:
+    port: 9100/tcp
+    source: "{{ hostvars['ubuntu'].ansible_default_ipv4.address }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  when: 
+    - inventory_hostname in groups['rocky_nodes']
+    - ansible_os_family == "RedHat"
+  ignore_errors: yes
