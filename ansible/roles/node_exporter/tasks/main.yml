@@ -10,6 +10,9 @@
     url: "https://github.com/prometheus/node_exporter/releases/download/v1.10.2/node_exporter-1.10.2.linux-amd64.tar.gz"
     dest: /tmp/node_exporter.tar.gz
     checksum: "sha256:c46e5b6f53948477ff3a19d97c58307394a29fe64a01905646f026ddc32cb65b"  #可选
+    environment:
+      http_proxy: http://192.168.1.101:7890
+      https_proxy: http://192.168.1.101:7890
 
 - name:  解压并安装
   unarchive:

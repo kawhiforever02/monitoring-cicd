@@ -9,6 +9,9 @@
   get_url:
     url: "https://github.com/prometheus/prometheus/releases/download/v3.10.0/prometheus-3.10.0.linux-amd64.tar.gz"
     dest: /tmp/prometheus.tar.gz
+    environment:
+      http_proxy: http://192.168.1.101:7890
+      https_proxy: http://192.168.1.101:7890
 
 - name:  解压
   unarchive:
