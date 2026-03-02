@@ -8,11 +8,10 @@ jobs:
     runs-on: self-hosted  # 使用Ubuntu Runner
     steps:
       - name:  切换远程url为SSH
-      	run: |
-      	   git remote set-url origin git@github.com:kawhiforever02/monitoring-cicd.git
-      	shell: bash
-        
-    steps:
+        run: |
+           git remote set-url origin git@github.com:kawhiforever02/monitoring-cicd.git
+        shell: bash
+
       - name:  检出代码
         uses: actions/checkout@v4
         with:
