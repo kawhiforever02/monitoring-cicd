@@ -10,13 +10,13 @@ jobs:
       - name:  切换远程url为SSH
       	run: |
       	   git remote set-url origin git@github.com:kawhiforever02/monitoring-cicd.git
-      	shell:bash
+      	shell: bash
         
     steps:
       - name:  检出代码
         uses: actions/checkout@v4
         with:
-          ssh-key:${{secrets.GITHUB_SSH_KEY}}
+          ssh-key: ${{secrets.GITHUB_SSH_KEY}}
 
       - name:  配置SSH密钥（连接Rocky）
         run: |
