@@ -33,6 +33,14 @@
     group: alertmanager
     mode: '0755'
 
+- name: 创建 Alertmanager 数据目录
+  file:
+    path: /var/lib/alertmanager
+    state: directory
+    owner: alertmanager
+    group: alertmanager
+    mode: '0755'
+
 - name:  生成alertmanager.yml（敏感信息注入！）
   template:
     src: alertmanager.yml.j2
