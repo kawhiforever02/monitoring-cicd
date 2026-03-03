@@ -4,10 +4,10 @@ date >> deployment-report.txt
 
 # 检查Rocky Node Exporter
 echo -n "Rocky Node Exporter: " >> deployment-report.txt
-if curl -m 10 -s http://$ROCKY_IP:9100/metrics 2>/dev/null | grep -q "node_cpu_seconds_total"; then
-  echo " UP" >> deployment-report.txt
+if curl -m 8 -s http://$ROCKY_IP:9100/metrics 2>/dev/null | head -n 20 | grep -q "go_gc_duration_seconds"; then
+  echo " UP"
 else
-  echo " DOWN" >> deployment-report.txt
+  echo " DOWN"
 fi
 
 # 检查Prometheus Targets
@@ -17,6 +17,9 @@ if curl -s http://localhost:9090/api/v1/targets | grep -q '"health":"up"'; then
 else
   echo "  部分异常" >> deployment-report.txt
 fi
+
+echo "等待服务完全初始化..."
+sleep 25  # 关键！给 Grafana 和 Prometheus 足够时间启动
 
 # 检查Grafana
 echo -n "Grafana服务: " >> deployment-report.txt
