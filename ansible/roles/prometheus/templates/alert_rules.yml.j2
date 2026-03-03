@@ -10,8 +10,8 @@ groups:
       severity: warning
       team: infra
     annotations:
-      summary: "High CPU usage on {{ \$labels.instance }}"
-      description: "CPU usage is {{ \$value | printf \"%.2f\" }}% (threshold: 80%)"
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is {{ $value | printf \"%.2f\" }}% (threshold: 80%)"
       runbook_url: "https://runbook.example.com/cpu-high"
 
   # 内存使用率 > 90%
@@ -21,8 +21,8 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "High memory usage on {{ \$labels.instance }}"
-      description: "Memory usage is {{ \$value | printf \"%.2f\" }}% (threshold: 90%)"
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is {{ $value | printf \"%.2f\" }}% (threshold: 90%)"
 
   # 磁盘使用率 > 85%
   - alert: HighDiskUsage
@@ -31,8 +31,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "High disk usage on {{ \$labels.instance }}"
-      description: "Disk usage is {{ \$value | printf \"%.2f\" }}% (threshold: 85%)"
+      summary: "High disk usage on {{ $labels.instance }}"
+      description: "Disk usage is {{ $value | printf \"%.2f\" }}% (threshold: 85%)"
 
   # Node Exporter宕机
   - alert: NodeDown
@@ -41,6 +41,6 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "{{ \$labels.instance }} is down"
-      description: "{{ \$labels.instance }} of job {{ \$labels.job }} has been down for more than 1 minute"
+      summary: "{{ $labels.instance }} is down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute"
 {% endraw %}
