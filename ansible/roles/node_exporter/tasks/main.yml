@@ -55,8 +55,7 @@
 # 仅对Rocky配置防火墙（允许Ubuntu IP访问9100）
 - name:  配置Rocky防火墙（仅当是Rocky节点时）
   firewalld:
-    port: 9100/tcp
-    source: "{{ hostvars['ubuntu'].ansible_default_ipv4.address }}"
+    rich_rule: "rule family='ipv4' source address='{{ hostvars['ubuntu'].ansible_default_ipv4.address }}' port protocol='tcp' port='9100' accept"
     permanent: yes
     state: enabled
     immediate: yes
