@@ -1,3 +1,4 @@
+{% raw %}
 groups:
 - name: node_monitoring
   rules:
@@ -42,3 +43,4 @@ groups:
     annotations:
       summary: "{{ \$labels.instance }} is down"
       description: "{{ \$labels.instance }} of job {{ \$labels.job }} has been down for more than 1 minute"
+{% endraw %}
