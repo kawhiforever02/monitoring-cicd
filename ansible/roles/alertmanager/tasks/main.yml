@@ -33,6 +33,7 @@
     src: /opt/alertmanager-0.31.1.linux-amd64/alertmanager
     dest: /usr/local/bin/alertmanager
     state: link
+    force: yes
 
 - name:  创建目录
   file:

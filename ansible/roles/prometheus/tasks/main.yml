@@ -32,6 +32,7 @@
     src: /opt/prometheus-3.10.0.linux-amd64/prometheus
     dest: /usr/local/bin/prometheus
     state: link
+    force: yes
 
 - name:  创建目录
   file:

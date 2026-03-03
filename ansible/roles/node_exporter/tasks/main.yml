@@ -30,6 +30,7 @@
     src: /opt/node_exporter-1.10.2.linux-amd64/node_exporter
     dest: /usr/local/bin/node_exporter
     state: link
+    force: yes
 
 - name:  创建systemd服务
   copy:
