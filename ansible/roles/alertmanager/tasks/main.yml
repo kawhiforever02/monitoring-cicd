@@ -9,6 +9,7 @@
   get_url:
     url: "https://github.com/prometheus/alertmanager/releases/download/v0.31.1/alertmanager-0.31.1.linux-amd64.tar.gz"
     dest: /tmp/alertmanager.tar.gz
+    timeout: 30
 
 - name:  解压
   unarchive:
