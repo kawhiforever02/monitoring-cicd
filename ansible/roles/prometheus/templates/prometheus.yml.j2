@@ -1,5 +1,10 @@
 global:
   scrape_interval: 15s
+  evaluation_interval: 15s
+
+# 新增：加载告警规则
+rule_files:
+  - "/etc/prometheus/alert_rules.yml"  # ← 关键！之前漏了这行
 
 scrape_configs:
   - job_name: 'ubuntu-local'

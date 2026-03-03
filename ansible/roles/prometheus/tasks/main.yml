@@ -37,6 +37,14 @@
     - /etc/prometheus
     - /var/lib/prometheus
 
+- name:  部署告警规则文件
+  template:
+    src: alert_rules.yml.j2
+    dest: /etc/prometheus/alert_rules.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0644'
+
 - name:  生成prometheus.yml（动态targets！）
   template:
     src: prometheus.yml.j2

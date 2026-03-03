@@ -1,0 +1,44 @@
+groups:
+- name: node_monitoring
+  rules:
+  # CPU使用率 > 80% 持续2分钟
+  - alert: HighCPUUsage
+    expr: 100 - (avg by (instance, job) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 2m
+    labels:
+      severity: warning
+      team: infra
+    annotations:
+      summary: "High CPU usage on {{ \$labels.instance }}"
+      description: "CPU usage is {{ \$value | printf \"%.2f\" }}% (threshold: 80%)"
+      runbook_url: "https://runbook.example.com/cpu-high"
+
+  # 内存使用率 > 90%
+  - alert: HighMemoryUsage
+    expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High memory usage on {{ \$labels.instance }}"
+      description: "Memory usage is {{ \$value | printf \"%.2f\" }}% (threshold: 90%)"
+
+  # 磁盘使用率 > 85%
+  - alert: HighDiskUsage
+    expr: (node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} / node_filesystem_size_bytes) * 100 < 15
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High disk usage on {{ \$labels.instance }}"
+      description: "Disk usage is {{ \$value | printf \"%.2f\" }}% (threshold: 85%)"
+
+  # Node Exporter宕机
+  - alert: NodeDown
+    expr: up{job=~"ubuntu-local|rocky-node"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "{{ \$labels.instance }} is down"
+      description: "{{ \$labels.instance }} of job {{ \$labels.job }} has been down for more than 1 minute"
