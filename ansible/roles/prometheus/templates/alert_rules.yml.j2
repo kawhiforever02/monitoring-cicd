@@ -4,8 +4,15 @@ groups:
   rules:
   # CPU使用率 > 80% 持续2分钟
   - alert: HighCPUUsage
-    expr: 100 - (avg by (instance, job) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
-    for: 2m
+    expr: |
+      100 - (
+      avg by (instance, job) (
+        avg_over_time(
+          rate(node_cpu_seconds_total{mode="idle"}[1m])[2m:]
+        )
+      ) * 100
+    ) > 80
+    for: 1m
     labels:
       severity: warning
       team: infra
@@ -17,7 +24,7 @@ groups:
   # 内存使用率 > 90%
   - alert: HighMemoryUsage
     expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
-    for: 2m
+    for: 1m
     labels:
       severity: critical
     annotations:
@@ -27,7 +34,7 @@ groups:
   # 磁盘使用率 > 85%
   - alert: HighDiskUsage
     expr: (node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} / node_filesystem_size_bytes) * 100 < 15
-    for: 5m
+    for: 2m
     labels:
       severity: warning
     annotations:
@@ -43,4 +50,3 @@ groups:
     annotations:
       summary: "{{ $labels.instance }} is down"
       description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute"
-{% endraw %}
