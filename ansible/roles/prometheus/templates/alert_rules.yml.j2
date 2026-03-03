@@ -2,16 +2,9 @@
 groups:
 - name: node_monitoring
   rules:
-  # CPU使用率 > 80% 持续2分钟
+  # CPUh近期使用率 > 80% 持续1分钟
   - alert: HighCPUUsage
-    expr: |
-      100 - (
-      avg by (instance, job) (
-        avg_over_time(
-          rate(node_cpu_seconds_total{mode="idle"}[1m])[2m:]
-        )
-      ) * 100
-    ) > 80
+    expr: 100 - (avg by (instance, job) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
     for: 1m
     labels:
       severity: warning
@@ -24,7 +17,7 @@ groups:
   # 内存使用率 > 90%
   - alert: HighMemoryUsage
     expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
-    for: 1m
+    for: 2m
     labels:
       severity: critical
     annotations:
@@ -34,7 +27,7 @@ groups:
   # 磁盘使用率 > 85%
   - alert: HighDiskUsage
     expr: (node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} / node_filesystem_size_bytes) * 100 < 15
-    for: 2m
+    for: 5m
     labels:
       severity: warning
     annotations:
