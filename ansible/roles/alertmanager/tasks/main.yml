@@ -27,6 +27,9 @@
     dest: /opt
     remote_src: yes
     creates: /opt/alertmanager-0.31.1.linux-amd64/alertmanager
+  when: >
+    alertmanager_version.stdout is not search("0.31.1") or
+    alertmanager_version.stderr is defined
 
 - name:  创建软链接（幂等）
   file:
@@ -34,6 +37,9 @@
     dest: /usr/local/bin/alertmanager
     state: link
     force: yes
+  when: >
+    alertmanager_version.stdout is not search("0.31.1") or
+    alertmanager_version.stderr is defined
 
 - name:  创建目录
   file:
@@ -50,7 +56,7 @@
     owner: alertmanager
     group: alertmanager
     mode: '0755'
-
+    
 - name:  生成alertmanager.yml（敏感信息注入！）
   template:
     src: alertmanager.yml.j2

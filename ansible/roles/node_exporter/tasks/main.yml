@@ -15,8 +15,10 @@
   get_url:
     url: "https://github.com/prometheus/node_exporter/releases/download/v1.10.2/node_exporter-1.10.2.linux-amd64.tar.gz"
     dest: /tmp/node_exporter.tar.gz
-    checksum: "sha256:c46e5b6f53948477ff3a19d97c58307394a29fe64a01905646f026ddc32cb65b"
+    checksum: 
+    "sha256:c46e5b6f53948477ff3a19d97c58307394a29fe64a01905646f026ddc32cb65b"
   when: node_exporter_status.failed or node_exporter_status.stdout != "active"
+
 
 - name:  解压并安装
   unarchive:
@@ -24,6 +26,7 @@
     dest: /opt
     remote_src: yes
     creates: /opt/node_exporter-1.10.2.linux-amd64/node_exporter
+  when: node_exporter_status.failed or node_exporter_status.stdout != "active"
 
 - name:  创建软链接（幂等）
   file:
@@ -31,6 +34,7 @@
     dest: /usr/local/bin/node_exporter
     state: link
     force: yes
+  when: node_exporter_status.failed or node_exporter_status.stdout != "active"
 
 - name:  创建systemd服务
   copy:
