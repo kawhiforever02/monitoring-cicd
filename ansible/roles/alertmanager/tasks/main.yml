@@ -5,26 +5,34 @@
     shell: /bin/false
     create_home: no
 
+- name:  检查Alertmanager是否已安装
+  command: alertmanager --version
+  ignore_errors: yes
+  register: alertmanager_version
+  changed_when: false
+
 - name:  下载Alertmanager
   get_url:
     url: "https://github.com/prometheus/alertmanager/releases/download/v0.31.1/alertmanager-0.31.1.linux-amd64.tar.gz"
     dest: /tmp/alertmanager.tar.gz
+    mode: '0644'
     timeout: 30
+  when: >
+    alertmanager_version.stdout is not search("0.31.1") or
+    alertmanager_version.stderr is defined
 
 - name:  解压
   unarchive:
     src: /tmp/alertmanager.tar.gz
-    dest: /tmp
+    dest: /opt
     remote_src: yes
-  register: am_extract
+    creates: /opt/alertmanager-0.31.1.linux-amd64/alertmanager
 
-- name:  复制二进制
-  copy:
-    src: "/tmp/alertmanager-0.31.1.linux-amd64/alertmanager"
+- name:  创建软链接（幂等）
+  file:
+    src: /opt/alertmanager-0.27.0.linux-amd64/alertmanager
     dest: /usr/local/bin/alertmanager
-    owner: alertmanager
-    group: alertmanager
-    mode: '0755'
+    state: link
 
 - name:  创建目录
   file:

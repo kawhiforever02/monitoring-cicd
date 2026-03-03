@@ -5,26 +5,33 @@
     shell: /bin/false
     create_home: no
 
+- name:  检查Prometheus是否已安装
+  command: prometheus --version
+  ignore_errors: yes
+  register: prometheus_version
+  changed_when: false
+
 - name:  下载Prometheus
   get_url:
     url: "https://github.com/prometheus/prometheus/releases/download/v3.10.0/prometheus-3.10.0.linux-amd64.tar.gz"
     dest: /tmp/prometheus.tar.gz
     timeout: 200
+  when: >
+    prometheus_version.stdout is not search("3.10.0") or
+    prometheus_version.stderr is defined
 
 - name:  解压
   unarchive:
     src: /tmp/prometheus.tar.gz
-    dest: /tmp
+    dest: /opt
     remote_src: yes
-  register: p_extract
+    creates: /opt/prometheus-3.10.0.linux-amd64/prometheus
 
-- name:  复制二进制
-  copy:
-    src: "/tmp/prometheus-3.10.0.linux-amd64/prometheus"
+- name:  创建软链接（幂等）
+  file:
+    src: /opt/prometheus-2.47.2.linux-amd64/prometheus
     dest: /usr/local/bin/prometheus
-    owner: prometheus
-    group: prometheus
-    mode: '0755'
+    state: link
 
 - name:  创建目录
   file:

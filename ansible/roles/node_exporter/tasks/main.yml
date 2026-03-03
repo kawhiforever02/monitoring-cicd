@@ -5,26 +5,32 @@
     shell: /bin/false
     create_home: no
 
+- name:  检查Node Exporter是否已安装
+  command: systemctl is-active node_exporter
+  ignore_errors: yes
+  register: node_exporter_status
+  changed_when: false
+
 - name:  下载Node Exporter
   get_url:
     url: "https://github.com/prometheus/node_exporter/releases/download/v1.10.2/node_exporter-1.10.2.linux-amd64.tar.gz"
     dest: /tmp/node_exporter.tar.gz
-    checksum: "sha256:c46e5b6f53948477ff3a19d97c58307394a29fe64a01905646f026ddc32cb65b"  #可选
+    checksum: 
+    "sha256:c46e5b6f53948477ff3a19d97c58307394a29fe64a01905646f026ddc32cb65b"  # 可选
+  when: node_exporter_status.stdout != "active"
 
 - name:  解压并安装
   unarchive:
     src: /tmp/node_exporter.tar.gz
-    dest: /tmp
+    dest: /opt
     remote_src: yes
-  register: ne_extract
+    creates: /opt/node_exporter-1.10.2.linux-amd64/node_exporter
 
-- name:  复制二进制文件
-  copy:
-    src: "/tmp/node_exporter-1.10.2.linux-amd64/node_exporter"
+- name:  创建软链接（幂等）
+  file:
+    src: /opt/node_exporter-1.8.2.linux-amd64/node_exporter
     dest: /usr/local/bin/node_exporter
-    owner: node_exporter
-    group: node_exporter
-    mode: '0755'
+    state: link
 
 - name:  创建systemd服务
   copy:
