@@ -30,7 +30,7 @@
 
 - name:  创建软链接（幂等）
   file:
-    src: /opt/alertmanager-0.27.0.linux-amd64/alertmanager
+    src: /opt/alertmanager-0.31.1.linux-amd64/alertmanager
     dest: /usr/local/bin/alertmanager
     state: link
 

@@ -27,7 +27,7 @@
 
 - name:  创建软链接（幂等）
   file:
-    src: /opt/node_exporter-1.8.2.linux-amd64/node_exporter
+    src: /opt/node_exporter-1.10.2.linux-amd64/node_exporter
     dest: /usr/local/bin/node_exporter
     state: link
 

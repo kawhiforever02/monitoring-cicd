@@ -29,7 +29,7 @@
 
 - name:  创建软链接（幂等）
   file:
-    src: /opt/prometheus-2.47.2.linux-amd64/prometheus
+    src: /opt/prometheus-3.10.0.linux-amd64/prometheus
     dest: /usr/local/bin/prometheus
     state: link
 
